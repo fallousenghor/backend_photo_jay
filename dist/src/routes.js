@@ -1,0 +1,22 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = __importDefault(require("express"));
+const userRoutes_1 = __importDefault(require("./routes/userRoutes"));
+const productRoutes_1 = __importDefault(require("./routes/productRoutes"));
+const productImageRoutes_1 = __importDefault(require("./routes/productImageRoutes"));
+const notificationRoutes_1 = __importDefault(require("./routes/notificationRoutes"));
+const categoryRoutes_1 = __importDefault(require("./routes/categoryRoutes"));
+const moderationLogRoutes_1 = __importDefault(require("./routes/moderationLogRoutes"));
+const adminRoutes_1 = __importDefault(require("./routes/adminRoutes"));
+const router = express_1.default.Router();
+router.use('/users', userRoutes_1.default);
+router.use('/products', productRoutes_1.default);
+router.use('/product-images', productImageRoutes_1.default);
+router.use('/notifications', notificationRoutes_1.default);
+router.use('/categories', categoryRoutes_1.default);
+router.use('/moderation-logs', moderationLogRoutes_1.default);
+router.use('/admin', adminRoutes_1.default);
+exports.default = router;

@@ -1,0 +1,110 @@
+
+
+generator client {
+  provider = "prisma-client-js"
+  // output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  MODERATEUR
+  ADMIN
+}
+
+enum Action {
+  APPROVED
+  REJECTED
+}
+
+enum ProductStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum NotificationType {
+  REPUBLISH
+  GENERAL
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  userName  String
+  email     String   @unique
+  password  String
+  role      Role
+  isVIP     Boolean  @default(false)
+  phoneNumber  String
+  whatsappNumber String?
+  shopLink String?
+  createdAt DateTime
+  updatedAt DateTime
+
+  products       Product[]       @relation("UserProducts")
+  notifications  Notification[]  @relation("UserNotifications")
+  moderations    ModerationLog[] @relation("ModeratorLogs")
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  price       Float?
+  userId      Int
+  user        User     @relation("UserProducts", fields: [userId], references: [id])
+  categoryId  Int?
+  category    Category? @relation("ProductCategory", fields: [categoryId], references: [id])
+  status      ProductStatus @default(PENDING)
+  priority    Boolean  @default(false) // True if user is VIP
+  views       Int      @default(0)
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  images      ProductImage[] @relation("ProductImages")
+  moderations ModerationLog[] @relation("ProductModerations")
+}
+
+model ProductImage {
+  id        Int      @id @default(autoincrement())
+  productId Int
+  product   Product  @relation("ProductImages", fields: [productId], references: [id])
+  url       String
+  publicId  String   // Cloudinary public ID
+  createdAt DateTime @default(now())
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation("UserNotifications", fields: [userId], references: [id])
+  type      NotificationType
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Category {
+  id        Int      @id @default(autoincrement())
+  name      String
+  createdAt DateTime
+  updatedAt DateTime
+
+  products  Product[] @relation("ProductCategory")
+}
+
+model ModerationLog {
+  id          Int      @id @default(autoincrement())
+  productId   Int
+  product     Product  @relation("ProductModerations", fields: [productId], references: [id])
+  moderatorId Int
+  moderator   User     @relation("ModeratorLogs", fields: [moderatorId], references: [id])
+  action      Action
+  reason      String?
+  createdAt   DateTime @default(now())
+}
