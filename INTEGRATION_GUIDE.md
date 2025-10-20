@@ -10,6 +10,18 @@ Ce guide fournit une documentation complète pour intégrer votre API backend Ty
 - **Validation**: Zod schemas
 - **Base de données**: Prisma (PostgreSQL/MySQL/SQLite)
 
+## CORS et configuration du frontend
+
+Si votre frontend est déployé sur un domaine différent (par exemple Vercel), définissez la variable d'environnement `FRONTEND_URL` sur le service backend (Render) afin d'autoriser seulement ce domaine via CORS.
+
+Exemple de valeur:
+
+```
+FRONTEND_URL=https://frontend-photol-jay.vercel.app
+```
+
+Le backend autorise automatiquement quelques origines de développement (`http://localhost:4200`, `http://localhost:3007`) et l'origine indiquée par `FRONTEND_URL`.
+
 ## Authentification
 
 L'API utilise des tokens JWT pour sécuriser les endpoints. Les tokens doivent être inclus dans l'en-tête `Authorization` sous la forme `Bearer <token>`.
