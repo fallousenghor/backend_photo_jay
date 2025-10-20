@@ -101,7 +101,7 @@ L'API utilise des tokens JWT pour s√©curiser les endpoints. Les tokens doivent √
   "description": "string",
   "price": "number (optionnel)",
   "userId": "number",
-  "isApproved": "boolean (optionnel)",
+  "status": "string enum ('PENDING' | 'APPROVED' | 'REJECTED')",
   "priority": "boolean (optionnel)",
   "views": "number (optionnel)",
   "expiresAt": "Date"
@@ -383,7 +383,7 @@ export interface Product {
   description: string;
   price: number | null;
   userId: number;
-  isApproved: boolean;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
   priority: boolean;
   views: number;
   expiresAt: Date;
