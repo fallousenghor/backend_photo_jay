@@ -40,7 +40,13 @@ class NotificationController {
     }
     async findAll(req, res) {
         try {
-            const notifications = await this.notificationService.findAll();
+            // Get user ID from auth middleware (assuming it's set)
+            const userId = req.user?.id;
+            if (!userId) {
+                res.status(errorCode_1.ErrorCode.UNAUTHORIZED).json({ error: 'Utilisateur non authentifié' });
+                return;
+            }
+            const notifications = await this.notificationService.findByUserId(userId);
             res.status(successCode_1.SuccessCode.OK).json(notifications);
         }
         catch (error) {
@@ -67,6 +73,53 @@ class NotificationController {
             const id = parseInt(req.params.id);
             await this.notificationService.delete(id);
             res.status(successCode_1.SuccessCode.NO_CONTENT).send();
+        }
+        catch (error) {
+            res.status(errorCode_1.ErrorCode.INTERNAL_SERVER_ERROR).json({ error: error.message });
+        }
+    }
+    async markAsRead(req, res) {
+        try {
+            const id = parseInt(req.params.id);
+            const userId = req.user?.id;
+            if (!userId) {
+                res.status(errorCode_1.ErrorCode.UNAUTHORIZED).json({ error: 'Utilisateur non authentifié' });
+                return;
+            }
+            const notification = await this.notificationService.markAsRead(id, userId);
+            res.status(successCode_1.SuccessCode.OK).json(notification);
+        }
+        catch (error) {
+            if (error.message === 'Notification not found or access denied') {
+                res.status(errorCode_1.ErrorCode.NOT_FOUND).json({ error: error.message });
+                return;
+            }
+            res.status(errorCode_1.ErrorCode.INTERNAL_SERVER_ERROR).json({ error: error.message });
+        }
+    }
+    async markAllAsRead(req, res) {
+        try {
+            const userId = req.user?.id;
+            if (!userId) {
+                res.status(errorCode_1.ErrorCode.UNAUTHORIZED).json({ error: 'Utilisateur non authentifié' });
+                return;
+            }
+            await this.notificationService.markAllAsRead(userId);
+            res.status(successCode_1.SuccessCode.OK).json({ message: 'Toutes les notifications ont été marquées comme lues' });
+        }
+        catch (error) {
+            res.status(errorCode_1.ErrorCode.INTERNAL_SERVER_ERROR).json({ error: error.message });
+        }
+    }
+    async getUnreadCount(req, res) {
+        try {
+            const userId = req.user?.id;
+            if (!userId) {
+                res.status(errorCode_1.ErrorCode.UNAUTHORIZED).json({ error: 'Utilisateur non authentifié' });
+                return;
+            }
+            const count = await this.notificationService.getUnreadCount(userId);
+            res.status(successCode_1.SuccessCode.OK).json({ count });
         }
         catch (error) {
             res.status(errorCode_1.ErrorCode.INTERNAL_SERVER_ERROR).json({ error: error.message });

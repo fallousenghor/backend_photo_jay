@@ -22,6 +22,29 @@ class NotificationRepository {
     async findAll() {
         return db_1.default.notification.findMany();
     }
+    async findByUserId(userId) {
+        return db_1.default.notification.findMany({
+            where: { userId },
+            orderBy: { createdAt: 'desc' }
+        });
+    }
+    async markAllAsRead(userId) {
+        await db_1.default.notification.updateMany({
+            where: {
+                userId,
+                isRead: false
+            },
+            data: { isRead: true }
+        });
+    }
+    async getUnreadCount(userId) {
+        return db_1.default.notification.count({
+            where: {
+                userId,
+                isRead: false
+            }
+        });
+    }
     async update(id, data) {
         const prismaData = {};
         if (data.userId !== undefined)

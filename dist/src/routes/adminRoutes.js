@@ -17,6 +17,10 @@ router.post('/products/:id/moderate', adminController.moderateProduct.bind(admin
 // Gestion utilisateurs VIP
 router.get('/vip-users', adminController.getVipUsers.bind(adminController));
 router.post('/users/:id/toggle-vip', adminController.toggleVipStatus.bind(adminController));
+// Gestion produits VIP
+router.post('/products/:id/toggle-vip', adminController.toggleProductVipStatus.bind(adminController));
+// Gestion de tous les produits
+router.get('/products', adminController.getAllProducts.bind(adminController));
 // Actions récentes de modération
 router.get('/recent-moderations', adminController.getRecentModerations.bind(adminController));
 exports.default = router;

@@ -115,6 +115,26 @@ class AdminController {
             res.status(500).json(response);
         }
     }
+    async toggleProductVipStatus(req, res) {
+        try {
+            const productId = parseInt(req.params.id);
+            const adminId = req.user.id;
+            await this.adminService.toggleProductVipStatus(productId, adminId);
+            const response = {
+                success: true,
+                message: 'Statut VIP du produit modifié avec succès'
+            };
+            res.json(response);
+        }
+        catch (error) {
+            console.error('Error toggling product VIP status:', error);
+            const response = {
+                success: false,
+                message: 'Erreur lors de la modification du statut VIP du produit'
+            };
+            res.status(500).json(response);
+        }
+    }
     async getRecentModerations(req, res) {
         try {
             const recentModerations = await this.adminService.getRecentModerations();
@@ -129,6 +149,24 @@ class AdminController {
             const response = {
                 success: false,
                 message: 'Erreur lors de la récupération des actions récentes'
+            };
+            res.status(500).json(response);
+        }
+    }
+    async getAllProducts(req, res) {
+        try {
+            const products = await this.adminService.getAllProducts();
+            const response = {
+                success: true,
+                data: products
+            };
+            res.json(response);
+        }
+        catch (error) {
+            console.error('Error getting all products:', error);
+            const response = {
+                success: false,
+                message: 'Erreur lors de la récupération des produits'
             };
             res.status(500).json(response);
         }

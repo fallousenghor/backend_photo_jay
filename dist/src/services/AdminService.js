@@ -67,11 +67,45 @@ class AdminService {
             images: product.images
         }));
     }
+    async getAllProducts() {
+        const products = await this.prisma.product.findMany({
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        userName: true,
+                        email: true
+                    }
+                },
+                images: {
+                    select: {
+                        id: true,
+                        url: true
+                    }
+                }
+            },
+            orderBy: { createdAt: 'desc' }
+        });
+        return products.map(product => ({
+            id: product.id,
+            title: product.title,
+            description: product.description,
+            price: product.price,
+            status: product.status,
+            priority: product.priority,
+            views: product.views,
+            createdAt: product.createdAt,
+            updatedAt: product.updatedAt,
+            user: product.user,
+            images: product.images
+        }));
+    }
     async moderateProduct(params) {
         const { productId, moderatorId, action, reason } = params;
         await this.prisma.$transaction(async (tx) => {
             const product = await tx.product.findUnique({
-                where: { id: productId }
+                where: { id: productId },
+                include: { user: true }
             });
             if (!product) {
                 throw new Error('Product not found');
@@ -90,7 +124,31 @@ class AdminService {
                 action,
                 reason
             });
-            // TODO: Send notification to product owner
+            // Send notification to product owner if rejected
+            if (action === 'REJECTED') {
+                const notificationMessage = reason
+                    ? `Votre produit "${product.title}" a été rejeté. Raison : ${reason}`
+                    : `Votre produit "${product.title}" a été rejeté par un modérateur.`;
+                await tx.notification.create({
+                    data: {
+                        userId: product.userId,
+                        type: 'GENERAL',
+                        message: notificationMessage,
+                        isRead: false
+                    }
+                });
+            }
+            else if (action === 'APPROVED') {
+                // Send approval notification
+                await tx.notification.create({
+                    data: {
+                        userId: product.userId,
+                        type: 'GENERAL',
+                        message: `Félicitations ! Votre produit "${product.title}" a été approuvé et est maintenant visible par tous les utilisateurs.`,
+                        isRead: false
+                    }
+                });
+            }
         });
     }
     async getApprovalTrends() {
@@ -153,6 +211,19 @@ class AdminService {
         await this.prisma.user.update({
             where: { id: userId },
             data: { isVIP: !user.isVIP }
+        });
+    }
+    async toggleProductVipStatus(productId, adminId) {
+        const product = await this.prisma.product.findUnique({
+            where: { id: productId },
+            select: { priority: true, userId: true }
+        });
+        if (!product) {
+            throw new Error('Produit non trouvé');
+        }
+        await this.prisma.product.update({
+            where: { id: productId },
+            data: { priority: !product.priority }
         });
     }
     async getRecentModerations(limit = 10) {
