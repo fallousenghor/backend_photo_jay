@@ -9,6 +9,7 @@ const app = express();
 const defaultOrigins = [
   'https://photoljay-frontend.onrender.com',
   'https://photoljay.com',
+  'https://frontend-photol-jay.vercel.app',
   'http://localhost:4200',
   'http://localhost:3007'
 ];

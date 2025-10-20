@@ -8,13 +8,25 @@ const cors_1 = __importDefault(require("cors"));
 const path_1 = __importDefault(require("path"));
 const routes_1 = __importDefault(require("./routes"));
 const app = (0, express_1.default)();
+// Configure CORS origins. Allow an explicit FRONTEND_URL from env (set this on Render/Vercel)
+const defaultOrigins = [
+    'https://photoljay-frontend.onrender.com',
+    'https://photoljay.com',
+    'http://localhost:4200',
+    'http://localhost:3007'
+];
+const frontendUrl = process.env.FRONTEND_URL;
+const allowedOrigins = frontendUrl ? Array.from(new Set([frontendUrl, ...defaultOrigins])) : defaultOrigins;
 app.use((0, cors_1.default)({
-    origin: [
-        'https://photoljay-frontend.onrender.com',
-        'https://photoljay.com',
-        'http://localhost:4200',
-        'http://localhost:3007'
-    ], // Allow both production and development origins
+    origin: (origin, callback) => {
+        // Allow non-browser requests like curl/postman (no origin)
+        if (!origin)
+            return callback(null, true);
+        if (allowedOrigins.indexOf(origin) !== -1) {
+            return callback(null, true);
+        }
+        return callback(new Error('CORS policy: Origin not allowed'));
+    },
     credentials: true
 }));
 app.use(express_1.default.json());
